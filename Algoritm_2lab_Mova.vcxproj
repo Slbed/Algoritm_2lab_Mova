@@ -124,9 +124,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Algoritm_2lab_Mova.cpp" />
+    <ClCompile Include="CS.cpp" />
     <ClCompile Include="Pipe.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CS.h" />
     <ClInclude Include="Pipe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
