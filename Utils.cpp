@@ -1,43 +1,118 @@
 #include "Utils.h"
 #include <fstream>
+#include <algorithm>
+#include <cctype>
 
 std::string Utils::getLine(const std::string& prompt) {
     std::string input;
-    std::cout << prompt;
-    std::getline(std::cin, input);
-    return input;
+    while (true) {
+        std::cout << prompt;
+        std::getline(std::cin, input);
+
+        size_t start = input.find_first_not_of(" \t\n\r");
+        if (start == std::string::npos) {
+            std::cout << "Error! Input cannot be empty. Please enter a value: ";
+            continue;
+        }
+
+        size_t end = input.find_last_not_of(" \t\n\r");
+        input = input.substr(start, end - start + 1);
+
+        return input;
+    }
 }
 
 int Utils::getPositiveInt(const std::string& prompt) {
-    int value;
+    std::string input;
     while (true) {
         std::cout << prompt;
-        std::cin >> value;
-        if (std::cin.fail() || value <= 0) {
+        std::getline(std::cin, input);
+
+        input.erase(0, input.find_first_not_of(" \t\n\r"));
+        input.erase(input.find_last_not_of(" \t\n\r") + 1);
+
+        if (input.empty()) {
+            std::cout << "Error! Input cannot be empty. Please enter a positive integer: ";
+            continue;
+        }
+
+        bool is_valid = true;
+        for (char c : input) {
+            if (!isdigit(c)) {
+                is_valid = false;
+                break;
+            }
+        }
+
+        if (!is_valid) {
+            std::cout << "Error! Please enter a positive integer (digits only): ";
+            continue;
+        }
+
+        int value = std::stoi(input);
+        if (value <= 0) {
             std::cout << "Error! Please enter a positive integer: ";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
         }
-        else {
-            std::cin.ignore();
-            return value;
-        }
+
+        return value;
     }
 }
 
 double Utils::getPositiveDouble(const std::string& prompt) {
-    double value;
+    std::string input;
     while (true) {
         std::cout << prompt;
-        std::cin >> value;
-        if (std::cin.fail() || value <= 0) {
-            std::cout << "Error! Please enter a positive number: ";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::getline(std::cin, input);
+
+        input.erase(0, input.find_first_not_of(" \t\n\r"));
+        input.erase(input.find_last_not_of(" \t\n\r") + 1);
+
+        if (input.empty()) {
+            std::cout << "Error! Input cannot be empty. Please enter a positive number: ";
+            continue;
         }
-        else {
-            std::cin.ignore();
+
+        try {
+            double value = std::stod(input);
+            if (value <= 0) {
+                std::cout << "Error! Please enter a positive number: ";
+                continue;
+            }
             return value;
+        }
+        catch (const std::exception&) {
+            std::cout << "Error! Please enter a valid number: ";
+            continue;
+        }
+    }
+}
+
+double Utils::getNonNegativeDouble(const std::string& prompt) {
+    std::string input;
+    while (true) {
+        std::cout << prompt;
+        std::getline(std::cin, input);
+
+        input.erase(0, input.find_first_not_of(" \t\n\r"));
+        input.erase(input.find_last_not_of(" \t\n\r") + 1);
+
+        if (input.empty()) {
+            std::cout << "Error! Input cannot be empty. Please enter a non-negative number: ";
+            continue;
+        }
+
+        try {
+            double value = std::stod(input);
+            if (value < 0) {
+                std::cout << "Error! Please enter a non-negative number: ";
+                continue;
+            }
+            return value;
+        }
+        catch (const std::exception&) {
+            std::cout << "Error! Please enter a valid number: ";
+            continue;
         }
     }
 }
@@ -46,18 +121,27 @@ bool Utils::getBool(const std::string& prompt) {
     std::string input;
     while (true) {
         std::cout << prompt << " (1 - yes, 0 - no): ";
-        std::cin >> input;
-        if (input == "1" || input == "yes") {
-            std::cin.ignore();
+        std::getline(std::cin, input);
+
+        input.erase(0, input.find_first_not_of(" \t\n\r"));
+        input.erase(input.find_last_not_of(" \t\n\r") + 1);
+
+        if (input.empty()) {
+            std::cout << "Error! Input cannot be empty. ";
+            continue;
+        }
+
+        std::string lower_input = input;
+        std::transform(lower_input.begin(), lower_input.end(), lower_input.begin(), ::tolower);
+
+        if (lower_input == "1" || lower_input == "yes" || lower_input == "y" || lower_input == "да" || lower_input == "д") {
             return true;
         }
-        else if (input == "0" || input == "no") {
-            std::cin.ignore();
+        else if (lower_input == "0" || lower_input == "no" || lower_input == "n" || lower_input == "нет" || lower_input == "н") {
             return false;
         }
         else {
             std::cout << "Error! Please enter 1 or 0: ";
-            std::cin.ignore();
         }
     }
 }
@@ -70,6 +154,48 @@ int Utils::getIntInRange(const std::string& prompt, int min, int max) {
             return value;
         }
         std::cout << "Error! Please enter a number between " << min << " and " << max << ": ";
+    }
+}
+
+int Utils::getMenuChoice(const std::string& prompt) {
+    std::string input;
+    while (true) {
+        std::cout << prompt;
+        std::getline(std::cin, input);
+
+        input.erase(0, input.find_first_not_of(" \t\n\r"));
+        input.erase(input.find_last_not_of(" \t\n\r") + 1);
+
+        if (input.empty()) {
+            std::cout << "Error! Input cannot be empty. Please enter a number from 0 to 11: ";
+            continue;
+        }
+
+        bool is_valid = true;
+        for (char c : input) {
+            if (!isdigit(c)) {
+                is_valid = false;
+                break;
+            }
+        }
+
+        if (!is_valid) {
+            std::cout << "Error! Please enter a valid number from 0 to 11: ";
+            continue;
+        }
+
+        try {
+            int value = std::stoi(input);
+            if (value < 0 || value > 11) {
+                std::cout << "Error! Please enter a number from 0 to 11: ";
+                continue;
+            }
+            return value;
+        }
+        catch (const std::exception&) {
+            std::cout << "Error! Please enter a valid number from 0 to 11: ";
+            continue;
+        }
     }
 }
 

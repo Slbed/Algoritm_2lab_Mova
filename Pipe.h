@@ -24,10 +24,15 @@ public:
     void setLength(double length);
     void setDiameter(int diameter);
     void setUnderRepair(bool status);
+    void setId(int newId);
 
     void edit();
+    void fullEdit();
+
     static Pipe loadFromStream(std::ifstream& in);
     void saveToStream(std::ofstream& out) const;
+
+    static void resetNextId();
 
     friend std::ostream& operator<<(std::ostream& os, const Pipe& pipe);
 };

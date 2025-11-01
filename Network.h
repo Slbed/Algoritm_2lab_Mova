@@ -12,7 +12,6 @@ private:
 public:
     void addPipe();
     void addCS();
-
     void viewAllObjects() const;
 
     std::vector<int> findPipesByName(const std::string& name) const;
@@ -22,8 +21,8 @@ public:
 
     void editPipe(int id);
     void editStation(int id);
-
     void batchEditPipes(const std::vector<int>& pipeIds);
+
     void deletePipe(int id);
     void deleteStation(int id);
 

@@ -1,4 +1,5 @@
 #include "CS.h"
+#include "Utils.h"
 #include <fstream>
 
 int CS::nextId = 1;
@@ -15,18 +16,70 @@ std::string CS::getEfficiency() const { return efficiency; }
 
 double CS::getUnusedPercentage() const {
     if (totalWorkshops == 0) return 0;
-    return ((totalWorkshops - workingWorkshops) * 100.0) / totalWorkshops;
+    return ((totalWorkshops - workingWorkshops) * 100) / totalWorkshops;
 }
 
 void CS::setName(const std::string& name) { this->name = name; }
 void CS::setTotalWorkshops(int total) { this->totalWorkshops = total; }
 void CS::setWorkingWorkshops(int working) { this->workingWorkshops = working; }
 void CS::setEfficiency(const std::string& efficiency) { this->efficiency = efficiency; }
+void CS::setId(int newId) { this->id = newId; }
+
+void CS::resetNextId() {
+    nextId = 1;
+}
 
 void CS::edit() {
     if (workingWorkshops < totalWorkshops) {
         workingWorkshops++;
     }
+}
+
+void CS::fullEdit() {
+    std::cout << "=== Editing Compressor Station ID: " << id << " ===" << std::endl;
+
+    std::cout << "Current name: " << name << std::endl;
+    if (Utils::getBool("Change name?")) {
+        setName(Utils::getLine("Enter new station name: "));
+        std::cout << "Name updated to: " << name << std::endl;
+    }
+
+    std::cout << "Current total workshops: " << totalWorkshops << std::endl;
+    if (Utils::getBool("Change total workshops?")) {
+        int newTotal = Utils::getPositiveInt("Enter new total workshops: ");
+        if (newTotal < workingWorkshops) {
+            std::cout << "Warning! New total workshops (" << newTotal
+                << ") is less than current working workshops (" << workingWorkshops
+                << "). Setting working workshops to " << newTotal << std::endl;
+            workingWorkshops = newTotal;
+        }
+        setTotalWorkshops(newTotal);
+        std::cout << "Total workshops updated to: " << totalWorkshops << std::endl;
+    }
+
+    std::cout << "Current working workshops: " << workingWorkshops << std::endl;
+    if (Utils::getBool("Change working workshops?")) {
+        int newWorking;
+        do {
+            newWorking = Utils::getPositiveInt("Enter new working workshops: ");
+            if (newWorking > totalWorkshops) {
+                std::cout << "Error! Working workshops cannot exceed total workshops ("
+                    << totalWorkshops << ")" << std::endl;
+            }
+        } while (newWorking > totalWorkshops);
+        setWorkingWorkshops(newWorking);
+        std::cout << "Working workshops updated to: " << workingWorkshops << std::endl;
+        std::cout << "Unused workshops: " << (totalWorkshops - workingWorkshops)
+            << " (" << getUnusedPercentage() << "%)" << std::endl;
+    }
+
+    std::cout << "Current efficiency class: " << efficiency << std::endl;
+    if (Utils::getBool("Change efficiency class?")) {
+        setEfficiency(Utils::getLine("Enter new efficiency class: "));
+        std::cout << "Efficiency class updated to: " << efficiency << std::endl;
+    }
+
+    std::cout << "Compressor station editing completed!" << std::endl;
 }
 
 CS CS::loadFromStream(std::ifstream& in) {

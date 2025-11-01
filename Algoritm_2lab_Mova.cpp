@@ -54,7 +54,7 @@ void searchStationsMenu(Network& network) {
         results = network.findStationsByName(name);
     }
     else {
-        double percent = Utils::getPositiveDouble("Enter minimum unused percentage: ");
+        double percent = Utils::getNonNegativeDouble("Enter minimum unused percentage: ");
         results = network.findStationsByUnusedPercentage(percent);
     }
 
@@ -113,62 +113,56 @@ int main() {
     std::cout << "=== Pipeline Control System ===" << std::endl;
     Network network;
 
-    try {
-        while (true) {
-            showMenu();
-            int choice = Utils::getIntInRange("Choose option: ", 0, 11);
+    while (true) {
+        showMenu();
+        int choice = Utils::getMenuChoice("Choose option: ");
 
-            switch (choice) {
-            case 1:
-                network.addPipe();
-                break;
-            case 2:
-                network.addCS();
-                break;
-            case 3:
-                network.viewAllObjects();
-                break;
-            case 4: {
-                int id = Utils::getPositiveInt("Enter pipe ID to edit: ");
-                network.editPipe(id);
-                break;
-            }
-            case 5: {
-                int id = Utils::getPositiveInt("Enter station ID to edit: ");
-                network.editStation(id);
-                break;
-            }
-            case 6:
-                searchPipesMenu(network);
-                break;
-            case 7:
-                searchStationsMenu(network);
-                break;
-            case 8:
-                batchEditMenu(network);
-                break;
-            case 9:
-                deleteObjectMenu(network);
-                break;
-            case 10: {
-                std::string filename = Utils::getLine("Enter filename to save: ");
-                network.saveToFile(filename);
-                break;
-            }
-            case 11: {
-                std::string filename = Utils::getLine("Enter filename to load: ");
-                network.loadFromFile(filename);
-                break;
-            }
-            case 0:
-                std::cout << "Goodbye!" << std::endl;
-                return 0;
-            }
+        switch (choice) {
+        case 1:
+            network.addPipe();
+            break;
+        case 2:
+            network.addCS();
+            break;
+        case 3:
+            network.viewAllObjects();
+            break;
+        case 4: {
+            int id = Utils::getPositiveInt("Enter pipe ID to edit: ");
+            network.editPipe(id);
+            break;
         }
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
+        case 5: {
+            int id = Utils::getPositiveInt("Enter station ID to edit: ");
+            network.editStation(id);
+            break;
+        }
+        case 6:
+            searchPipesMenu(network);
+            break;
+        case 7:
+            searchStationsMenu(network);
+            break;
+        case 8:
+            batchEditMenu(network);
+            break;
+        case 9:
+            deleteObjectMenu(network);
+            break;
+        case 10: {
+            std::string filename = Utils::getLine("Enter filename to save: ");
+            network.saveToFile(filename);
+            break;
+        }
+        case 11: {
+            std::string filename = Utils::getLine("Enter filename to load: ");
+            network.loadFromFile(filename);
+            break;
+        }
+        case 0:
+            std::cout << "Goodbye!" << std::endl;
+            return 0;
+        }
     }
 
     return 0;

@@ -25,10 +25,15 @@ public:
     void setTotalWorkshops(int total);
     void setWorkingWorkshops(int working);
     void setEfficiency(const std::string& efficiency);
+    void setId(int newId);
 
     void edit();
+    void fullEdit();
+
     static CS loadFromStream(std::ifstream& in);
     void saveToStream(std::ofstream& out) const;
+
+    static void resetNextId();
 
     friend std::ostream& operator<<(std::ostream& os, const CS& cs);
 };
