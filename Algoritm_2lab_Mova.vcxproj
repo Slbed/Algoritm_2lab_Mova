@@ -125,11 +125,15 @@
   <ItemGroup>
     <ClCompile Include="Algoritm_2lab_Mova.cpp" />
     <ClCompile Include="CS.cpp" />
+    <ClCompile Include="Network.cpp" />
     <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CS.h" />
+    <ClInclude Include="Network.h" />
     <ClInclude Include="Pipe.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
