@@ -88,7 +88,7 @@ void batchEditMenu(Network& network) {
     std::cout << "Found " << pipesToEdit.size() << " pipes" << std::endl;
     if (Utils::getBool("Edit all found pipes?")) {
         network.batchEditPipes(pipesToEdit);
-        std::cout << "Batch edit completed!" << std::endl;
+        std::cout << "Batch operation completed!" << std::endl;
     }
 }
 

@@ -16,7 +16,12 @@ void Pipe::setName(const std::string& name) { this->name = name; }
 void Pipe::setLength(double length) { this->length = length; }
 void Pipe::setDiameter(int diameter) { this->diameter = diameter; }
 void Pipe::setUnderRepair(bool status) { this->underRepair = status; }
-void Pipe::setId(int newId) { this->id = newId; }
+void Pipe::setId(int newId) {
+    this->id = newId;
+    if (newId >= nextId) {
+        nextId = newId + 1;
+    }
+}
 
 void Pipe::resetNextId() {
     nextId = 1;
@@ -62,7 +67,9 @@ Pipe Pipe::loadFromStream(std::ifstream& in) {
     in.ignore();
     std::getline(in, pipe.name);
     in >> pipe.length >> pipe.diameter >> pipe.underRepair;
-    if (pipe.id >= nextId) nextId = pipe.id + 1;
+    if (pipe.id >= nextId) {
+        nextId = pipe.id + 1;
+    }
     return pipe;
 }
 

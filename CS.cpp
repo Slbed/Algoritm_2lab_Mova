@@ -16,14 +16,19 @@ std::string CS::getEfficiency() const { return efficiency; }
 
 double CS::getUnusedPercentage() const {
     if (totalWorkshops == 0) return 0;
-    return ((totalWorkshops - workingWorkshops) * 100) / totalWorkshops;
+    return ((totalWorkshops - workingWorkshops) * 100.0) / totalWorkshops;
 }
 
 void CS::setName(const std::string& name) { this->name = name; }
 void CS::setTotalWorkshops(int total) { this->totalWorkshops = total; }
 void CS::setWorkingWorkshops(int working) { this->workingWorkshops = working; }
 void CS::setEfficiency(const std::string& efficiency) { this->efficiency = efficiency; }
-void CS::setId(int newId) { this->id = newId; }
+void CS::setId(int newId) {
+    this->id = newId;
+    if (newId >= nextId) {
+        nextId = newId + 1;
+    }
+}
 
 void CS::resetNextId() {
     nextId = 1;
@@ -90,7 +95,9 @@ CS CS::loadFromStream(std::ifstream& in) {
     in >> cs.totalWorkshops >> cs.workingWorkshops;
     in.ignore();
     std::getline(in, cs.efficiency);
-    if (cs.id >= nextId) nextId = cs.id + 1;
+    if (cs.id >= nextId) {
+        nextId = cs.id + 1;
+    }
     return cs;
 }
 

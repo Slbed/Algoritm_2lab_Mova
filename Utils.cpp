@@ -134,10 +134,10 @@ bool Utils::getBool(const std::string& prompt) {
         std::string lower_input = input;
         std::transform(lower_input.begin(), lower_input.end(), lower_input.begin(), ::tolower);
 
-        if (lower_input == "1" || lower_input == "yes" || lower_input == "y" || lower_input == "да" || lower_input == "д") {
+        if (lower_input == "1" || lower_input == "yes" || lower_input == "y" || lower_input == "??" || lower_input == "?") {
             return true;
         }
-        else if (lower_input == "0" || lower_input == "no" || lower_input == "n" || lower_input == "нет" || lower_input == "н") {
+        else if (lower_input == "0" || lower_input == "no" || lower_input == "n" || lower_input == "???" || lower_input == "?") {
             return false;
         }
         else {
@@ -167,7 +167,7 @@ int Utils::getMenuChoice(const std::string& prompt) {
         input.erase(input.find_last_not_of(" \t\n\r") + 1);
 
         if (input.empty()) {
-            std::cout << "Error! Input cannot be empty. Please enter a number from 0 to 11: ";
+            std::cout << "Error! Input cannot be empty. Please enter a number from 0 to 12: ";
             continue;
         }
 
@@ -180,20 +180,20 @@ int Utils::getMenuChoice(const std::string& prompt) {
         }
 
         if (!is_valid) {
-            std::cout << "Error! Please enter a valid number from 0 to 11: ";
+            std::cout << "Error! Please enter a valid number from 0 to 12: ";
             continue;
         }
 
         try {
             int value = std::stoi(input);
-            if (value < 0 || value > 11) {
-                std::cout << "Error! Please enter a number from 0 to 11: ";
+            if (value < 0 || value > 12) {
+                std::cout << "Error! Please enter a number from 0 to 12: ";
                 continue;
             }
             return value;
         }
         catch (const std::exception&) {
-            std::cout << "Error! Please enter a valid number from 0 to 11: ";
+            std::cout << "Error! Please enter a valid number from 0 to 12: ";
             continue;
         }
     }

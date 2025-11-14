@@ -1,13 +1,14 @@
 #pragma once
 #include "Pipe.h"
 #include "CS.h"
-#include <vector>
+#include <unordered_map>
 #include <functional>
+#include <vector>
 
 class Network {
 private:
-    std::vector<Pipe> pipes;
-    std::vector<CS> stations;
+    std::unordered_map<int, Pipe> pipes;
+    std::unordered_map<int, CS> stations;
 
 public:
     void addPipe();
@@ -31,8 +32,4 @@ public:
 
     Pipe* getPipeById(int id);
     CS* getStationById(int id);
-
-private:
-    template<typename T>
-    void deleteObject(std::vector<T>& objects, int id);
 };
