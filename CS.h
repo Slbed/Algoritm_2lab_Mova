@@ -4,15 +4,23 @@
 
 class CS {
 private:
-    static int nextId;
-    int id;
+    int id;                    
     std::string name;
     int totalWorkshops;
     int workingWorkshops;
     std::string efficiency;
 
 public:
+    static int id_counter;      
+
     CS();
+    explicit CS(int forcedId);
+
+
+    CS& operator=(const CS&) = delete;
+
+
+    CS(const CS& other) = default;
 
     int getId() const;
     std::string getName() const;
@@ -25,7 +33,6 @@ public:
     void setTotalWorkshops(int total);
     void setWorkingWorkshops(int working);
     void setEfficiency(const std::string& efficiency);
-    void setId(int newId);
 
     void edit();
     void fullEdit();
@@ -33,7 +40,8 @@ public:
     static CS loadFromStream(std::ifstream& in);
     void saveToStream(std::ofstream& out) const;
 
-    static void resetNextId();
+    static void resetIdCounter();
+    static void setIdCounter(int new_counter);
 
     friend std::ostream& operator<<(std::ostream& os, const CS& cs);
 };

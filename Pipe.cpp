@@ -1,30 +1,45 @@
 #include "Pipe.h"
 #include "Utils.h"
 #include <fstream>
+#include <algorithm>
 
-int Pipe::nextId = 1;
+int Pipe::id_counter = 1;
 
-Pipe::Pipe() : id(nextId++), name(""), length(0), diameter(0), underRepair(false) {}
+
+Pipe::Pipe()
+    : id(id_counter++), name(""), length(0), diameter(0), underRepair(false), inUse(false) {
+}
+
+
+Pipe::Pipe(int forcedId)
+    : id(forcedId), name(""), length(0), diameter(0), underRepair(false), inUse(false) {
+    if (forcedId >= id_counter) {
+        id_counter = forcedId + 1;
+    }
+}
 
 int Pipe::getId() const { return id; }
 std::string Pipe::getName() const { return name; }
 double Pipe::getLength() const { return length; }
 int Pipe::getDiameter() const { return diameter; }
 bool Pipe::isUnderRepair() const { return underRepair; }
+bool Pipe::isInUse() const { return inUse; }
+bool Pipe::isAvailable() const { return !inUse && !underRepair; }
 
 void Pipe::setName(const std::string& name) { this->name = name; }
 void Pipe::setLength(double length) { this->length = length; }
 void Pipe::setDiameter(int diameter) { this->diameter = diameter; }
 void Pipe::setUnderRepair(bool status) { this->underRepair = status; }
-void Pipe::setId(int newId) {
-    this->id = newId;
-    if (newId >= nextId) {
-        nextId = newId + 1;
-    }
+void Pipe::setInUse(bool status) { this->inUse = status; }
+
+void Pipe::resetIdCounter() {
+    id_counter = 1;
 }
 
-void Pipe::resetNextId() {
-    nextId = 1;
+void Pipe::setIdCounter(int new_counter) {
+    if (new_counter >= id_counter) {
+        id_counter = new_counter + 1;
+    }
 }
 
 void Pipe::edit() {
@@ -62,14 +77,26 @@ void Pipe::fullEdit() {
 }
 
 Pipe Pipe::loadFromStream(std::ifstream& in) {
-    Pipe pipe;
-    in >> pipe.id;
+    int loadedId;
+    std::string loadedName;
+    double loadedLength;
+    int loadedDiameter;
+    bool loadedUnderRepair;
+    bool loadedInUse;
+
+    in >> loadedId;
     in.ignore();
-    std::getline(in, pipe.name);
-    in >> pipe.length >> pipe.diameter >> pipe.underRepair;
-    if (pipe.id >= nextId) {
-        nextId = pipe.id + 1;
-    }
+    std::getline(in, loadedName);
+    in >> loadedLength >> loadedDiameter >> loadedUnderRepair >> loadedInUse;
+    in.ignore();
+
+    Pipe pipe(loadedId);
+    pipe.setName(loadedName);
+    pipe.setLength(loadedLength);
+    pipe.setDiameter(loadedDiameter);
+    pipe.setUnderRepair(loadedUnderRepair);
+    pipe.setInUse(loadedInUse);
+
     return pipe;
 }
 
@@ -78,7 +105,8 @@ void Pipe::saveToStream(std::ofstream& out) const {
         << name << std::endl
         << length << std::endl
         << diameter << std::endl
-        << underRepair << std::endl;
+        << underRepair << std::endl
+        << inUse << std::endl;
 }
 
 std::ostream& operator<<(std::ostream& os, const Pipe& pipe) {
@@ -86,6 +114,7 @@ std::ostream& operator<<(std::ostream& os, const Pipe& pipe) {
         << "Name: " << pipe.name << std::endl
         << "Length: " << pipe.length << " km" << std::endl
         << "Diameter: " << pipe.diameter << " mm" << std::endl
-        << "Under repair: " << (pipe.underRepair ? "Yes" : "No") << std::endl;
+        << "Under repair: " << (pipe.underRepair ? "Yes" : "No") << std::endl
+        << "In use: " << (pipe.inUse ? "Yes" : "No") << std::endl;
     return os;
 }

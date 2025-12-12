@@ -15,6 +15,9 @@ void showMenu() {
     std::cout << "9. Delete Object" << std::endl;
     std::cout << "10. Save to File" << std::endl;
     std::cout << "11. Load from File" << std::endl;
+    std::cout << "12. Connect Stations (Network)" << std::endl;
+    std::cout << "13. View Network" << std::endl;
+    std::cout << "14. Topological Sort" << std::endl;
     std::cout << "0. Exit" << std::endl;
 }
 
@@ -159,9 +162,21 @@ int main() {
             network.loadFromFile(filename);
             break;
         }
+        case 12:
+            network.connectStations();
+            break;
+        case 13:
+            network.viewNetwork();
+            break;
+        case 14:
+            network.topologicalSort();
+            break;
         case 0:
             std::cout << "Goodbye!" << std::endl;
             return 0;
+        default:
+            std::cout << "Invalid choice!" << std::endl;
+            break;
         }
     }
 

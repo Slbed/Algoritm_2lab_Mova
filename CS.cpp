@@ -2,10 +2,19 @@
 #include "Utils.h"
 #include <fstream>
 
-int CS::nextId = 1;
+int CS::id_counter = 1;
+
 
 CS::CS()
-    : id(nextId++), name(""), totalWorkshops(0), workingWorkshops(0), efficiency("") {
+    : id(id_counter++), name(""), totalWorkshops(0), workingWorkshops(0), efficiency("") {
+}
+
+
+CS::CS(int forcedId)
+    : id(forcedId), name(""), totalWorkshops(0), workingWorkshops(0), efficiency("") {
+    if (forcedId >= id_counter) {
+        id_counter = forcedId + 1;
+    }
 }
 
 int CS::getId() const { return id; }
@@ -23,15 +32,15 @@ void CS::setName(const std::string& name) { this->name = name; }
 void CS::setTotalWorkshops(int total) { this->totalWorkshops = total; }
 void CS::setWorkingWorkshops(int working) { this->workingWorkshops = working; }
 void CS::setEfficiency(const std::string& efficiency) { this->efficiency = efficiency; }
-void CS::setId(int newId) {
-    this->id = newId;
-    if (newId >= nextId) {
-        nextId = newId + 1;
-    }
+
+void CS::resetIdCounter() {
+    id_counter = 1;
 }
 
-void CS::resetNextId() {
-    nextId = 1;
+void CS::setIdCounter(int new_counter) {
+    if (new_counter >= id_counter) {
+        id_counter = new_counter + 1;
+    }
 }
 
 void CS::edit() {
@@ -88,16 +97,25 @@ void CS::fullEdit() {
 }
 
 CS CS::loadFromStream(std::ifstream& in) {
-    CS cs;
-    in >> cs.id;
+    int loadedId;
+    std::string loadedName;
+    int loadedTotalWorkshops;
+    int loadedWorkingWorkshops;
+    std::string loadedEfficiency;
+
+    in >> loadedId;
     in.ignore();
-    std::getline(in, cs.name);
-    in >> cs.totalWorkshops >> cs.workingWorkshops;
+    std::getline(in, loadedName);
+    in >> loadedTotalWorkshops >> loadedWorkingWorkshops;
     in.ignore();
-    std::getline(in, cs.efficiency);
-    if (cs.id >= nextId) {
-        nextId = cs.id + 1;
-    }
+    std::getline(in, loadedEfficiency);
+
+    CS cs(loadedId);
+    cs.setName(loadedName);
+    cs.setTotalWorkshops(loadedTotalWorkshops);
+    cs.setWorkingWorkshops(loadedWorkingWorkshops);
+    cs.setEfficiency(loadedEfficiency);
+
     return cs;
 }
 

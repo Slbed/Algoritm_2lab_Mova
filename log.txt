@@ -79,3 +79,45 @@ Batch edited 1 pipes
 Deleted pipe with ID: 1
 Batch deleted 1 pipes
 Added pipe with ID: 3
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 5
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 5
+Added pipe with ID: 7
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 5
+Deleted pipe with ID: 1
+Deleted pipe with ID: 3
+Batch deleted 1 pipes
+Added pipe with ID: 1
+Added pipe with ID: 3
+Fully edited pipe with ID: 1
+Deleted pipe with ID: 1
+Added pipe with ID: 5
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 5
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 1
+Added pipe with ID: 3
+Added pipe with ID: 1
+Added pipe with ID: 2
+Added pipe with ID: 3
+Deleted pipe with ID: 2
+Added pipe with ID: 1
+Added pipe with ID: 2
+Added CS with ID: 1
+Added CS with ID: 2
+Added CS with ID: 3
+Connected CS 1 -> CS 3 using pipe 3
+Connected CS 3 -> CS 1 using pipe 1
+Added pipe with ID: 4
+Added pipe with ID: 5
+Connected CS 2 -> CS 3 using pipe 4
+Deleted pipe with ID: 1
