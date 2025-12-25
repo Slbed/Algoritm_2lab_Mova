@@ -167,7 +167,7 @@ int Utils::getMenuChoice(const std::string& prompt) {
         input.erase(input.find_last_not_of(" \t\n\r") + 1);
 
         if (input.empty()) {
-            std::cout << "Error! Input cannot be empty. Please enter a number from 0 to 14: ";
+            std::cout << "Error! Input cannot be empty. Please enter a number from 0 to 16: ";
             continue;
         }
 
@@ -180,20 +180,20 @@ int Utils::getMenuChoice(const std::string& prompt) {
         }
 
         if (!is_valid) {
-            std::cout << "Error! Please enter a valid number from 0 to 14: ";
+            std::cout << "Error! Please enter a valid number from 0 to 16: ";
             continue;
         }
 
         try {
             int value = std::stoi(input);
-            if (value < 0 || value > 14) {
-                std::cout << "Error! Please enter a number from 0 to 14: ";
+            if (value < 0 || value > 16) {
+                std::cout << "Error! Please enter a number from 0 to 16: ";
                 continue;
             }
             return value;
         }
         catch (const std::exception&) {
-            std::cout << "Error! Please enter a valid number from 0 to 14: ";
+            std::cout << "Error! Please enter a valid number from 0 to 16: ";
             continue;
         }
     }

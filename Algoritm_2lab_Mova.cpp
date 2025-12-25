@@ -18,6 +18,8 @@ void showMenu() {
     std::cout << "12. Connect Stations (Network)" << std::endl;
     std::cout << "13. View Network" << std::endl;
     std::cout << "14. Topological Sort" << std::endl;
+    std::cout << "15. Calculate Maximum Flow" << std::endl;
+    std::cout << "16. Find Shortest Path" << std::endl;
     std::cout << "0. Exit" << std::endl;
 }
 
@@ -112,6 +114,31 @@ void deleteObjectMenu(Network& network) {
     std::cout << "Object deleted!" << std::endl;
 }
 
+void maxFlowMenu(Network& network) {
+    std::cout << "\n=== CALCULATE MAXIMUM FLOW ===" << std::endl;
+
+    if (network.isAcyclic()) {
+        std::cout << "Note: The network is acyclic." << std::endl;
+    }
+    else {
+        std::cout << "Warning: The network contains cycles!" << std::endl;
+    }
+
+    int sourceId = Utils::getPositiveInt("Enter source CS ID: ");
+    int sinkId = Utils::getPositiveInt("Enter sink CS ID: ");
+
+    network.calculateMaxFlow(sourceId, sinkId);
+}
+
+void shortestPathMenu(Network& network) {
+    std::cout << "\n=== FIND SHORTEST PATH ===" << std::endl;
+
+    int startId = Utils::getPositiveInt("Enter start CS ID: ");
+    int endId = Utils::getPositiveInt("Enter end CS ID: ");
+
+    network.findShortestPath(startId, endId);
+}
+
 int main() {
     std::cout << "=== Pipeline Control System ===" << std::endl;
     Network network;
@@ -170,6 +197,12 @@ int main() {
             break;
         case 14:
             network.topologicalSort();
+            break;
+        case 15:
+            maxFlowMenu(network);
+            break;
+        case 16:
+            shortestPathMenu(network);
             break;
         case 0:
             std::cout << "Goodbye!" << std::endl;

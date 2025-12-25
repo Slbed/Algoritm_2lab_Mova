@@ -1,8 +1,11 @@
-#include "Network.h"
+﻿#include "Network.h"
 #include "Utils.h"
 #include <fstream>
 #include <algorithm>
 #include <iostream>
+#include <queue>
+#include <stack>
+#include <limits>
 
 void Network::addPipe() {
     Pipe pipe;
@@ -185,6 +188,8 @@ void Network::batchEditPipes(const std::vector<int>& pipeIds) {
 void Network::deletePipe(int id) {
     auto it = pipes.find(id);
     if (it != pipes.end()) {
+        removeConnectionsByPipeId(id);
+
         pipes.erase(it);
         Logger::log("Deleted pipe with ID: " + std::to_string(id));
         std::cout << "Pipe with ID " << id << " deleted successfully!" << std::endl;
@@ -197,6 +202,8 @@ void Network::deletePipe(int id) {
 void Network::deleteStation(int id) {
     auto it = stations.find(id);
     if (it != stations.end()) {
+        removeConnectionsByStationId(id);
+
         stations.erase(it);
         Logger::log("Deleted CS with ID: " + std::to_string(id));
         std::cout << "Compressor station with ID " << id << " deleted successfully!" << std::endl;
@@ -287,7 +294,17 @@ void Network::connectStations() {
         std::cout << "Created new pipe ID: " << pipeId << std::endl;
     }
 
-    connections.emplace_back(pipeId, csInId, csOutId, diameter);
+    Pipe* pipe = getPipeById(pipeId);
+    if (pipe) {
+        Connection conn(pipeId, csInId, csOutId, diameter);
+        conn.weight = pipe->calculateWeight();
+        conn.capacity = pipe->calculateCapacity();
+        connections.emplace_back(conn);
+    }
+    else {
+        connections.emplace_back(pipeId, csInId, csOutId, diameter);
+    }
+
     rebuildGraph();
 
     Logger::log("Connected CS " + std::to_string(csInId) + " -> CS " +
@@ -315,9 +332,20 @@ void Network::viewNetwork() const {
     std::cout << "Edges (connections): " << connections.size() << std::endl;
 }
 
+void Network::updateConnectionProperties() {
+    for (auto& conn : connections) {
+        Pipe* pipe = getPipeById(conn.id);
+        if (pipe) {
+            conn.weight = pipe->calculateWeight();
+            conn.capacity = pipe->calculateCapacity();
+        }
+    }
+}
+
 void Network::rebuildGraph() {
     adjacencyList.clear();
     inDegree.clear();
+    updateConnectionProperties();
 
     for (const auto& station_pair : stations) {
         int stationId = station_pair.first;
@@ -412,7 +440,7 @@ void Network::topologicalSort() {
         }
     }
 
-    if (sorted.size() != stations.size()) {
+    if ((int)sorted.size() != (int)stations.size()) {
         std::cout << "Error: Graph contains cycles!" << std::endl;
         return;
     }
@@ -451,7 +479,9 @@ void Network::saveToFile(const std::string& filename) const {
             out << conn.id << std::endl
                 << conn.csInId << std::endl
                 << conn.csOutId << std::endl
-                << conn.diameter << std::endl;
+                << conn.diameter << std::endl
+                << conn.weight << std::endl
+                << conn.capacity << std::endl;
         }
 
         out.close();
@@ -533,14 +563,18 @@ void Network::loadFromFile(const std::string& filename) {
                     return;
                 }
                 int pipeId, csInId, csOutId, diameter;
-                if (!(in >> pipeId >> csInId >> csOutId >> diameter)) {
+                double weight, capacity;
+                if (!(in >> pipeId >> csInId >> csOutId >> diameter >> weight >> capacity)) {
                     std::cout << "Error reading connection data" << std::endl;
                     break;
                 }
                 in.ignore();
 
                 if (pipes.find(pipeId) != pipes.end()) {
-                    connections.emplace_back(pipeId, csInId, csOutId, diameter);
+                    Connection conn(pipeId, csInId, csOutId, diameter);
+                    conn.weight = weight;
+                    conn.capacity = capacity;
+                    connections.emplace_back(conn);
                     pipes[pipeId].setInUse(true);
                 }
             }
@@ -574,4 +608,291 @@ CS* Network::getStationById(int id) {
         return &(it->second);
     }
     return nullptr;
+}
+
+void Network::removeConnectionsByPipeId(int pipeId) {
+    auto it = std::remove_if(connections.begin(), connections.end(),
+        [pipeId](const Connection& conn) {
+            return conn.id == pipeId;
+        });
+
+    int removedCount = (int)std::distance(it, connections.end());
+    connections.erase(it, connections.end());
+
+    if (removedCount > 0) {
+        Logger::log("Removed " + std::to_string(removedCount) +
+            " connections using pipe ID: " + std::to_string(pipeId));
+        std::cout << "Removed " << removedCount << " connection(s) using pipe ID " << pipeId << std::endl;
+
+        rebuildGraph();
+    }
+}
+
+void Network::removeConnectionsByStationId(int stationId) {
+    auto it = std::remove_if(connections.begin(), connections.end(),
+        [stationId](const Connection& conn) {
+            return conn.csInId == stationId || conn.csOutId == stationId;
+        });
+
+    int removedCount = (int)std::distance(it, connections.end());
+    connections.erase(it, connections.end());
+
+    if (removedCount > 0) {
+        Logger::log("Removed " + std::to_string(removedCount) +
+            " connections related to station ID: " + std::to_string(stationId));
+        std::cout << "Removed " << removedCount << " connection(s) related to station ID " << stationId << std::endl;
+
+        rebuildGraph();
+    }
+}
+
+bool Network::bfsForFlow(int source, int sink,
+    const std::vector<std::vector<double>>& capacity,
+    std::vector<int>& parent) const {
+    int n = (int)capacity.size();
+    std::vector<bool> visited(n, false);
+    std::queue<int> q;
+
+    q.push(source);
+    visited[source] = true;
+    parent[source] = -1;
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        for (int v = 0; v < n; ++v) {
+            if (!visited[v] && capacity[u][v] > 0) {
+                q.push(v);
+                parent[v] = u;
+                visited[v] = true;
+
+                if (v == sink) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+double Network::calculateMaxFlow(int sourceId, int sinkId) {
+    if (stations.empty() || connections.empty()) {
+        std::cout << "Error: Network is empty!" << std::endl;
+        return 0.0;
+    }
+
+    if (!getStationById(sourceId)) {
+        std::cout << "Error: Source station with ID " << sourceId << " not found!" << std::endl;
+        return 0.0;
+    }
+
+    if (!getStationById(sinkId)) {
+        std::cout << "Error: Sink station with ID " << sinkId << " not found!" << std::endl;
+        return 0.0;
+    }
+
+    if (sourceId == sinkId) {
+        std::cout << "Error: Source and sink cannot be the same station!" << std::endl;
+        return 0.0;
+    }
+
+    std::unordered_map<int, int> idToIndex;
+    std::unordered_map<int, int> indexToId;
+    int index = 0;
+    for (const auto& station_pair : stations) {
+        idToIndex[station_pair.first] = index;
+        indexToId[index] = station_pair.first;
+        index++;
+    }
+
+    int n = (int)stations.size();
+    int sourceIndex = idToIndex[sourceId];
+    int sinkIndex = idToIndex[sinkId];
+    std::vector<std::vector<double>> capacity(n, std::vector<double>(n, 0.0));
+
+    for (const auto& conn : connections) {
+        int u = idToIndex[conn.csInId];
+        int v = idToIndex[conn.csOutId];
+        capacity[u][v] += conn.capacity;
+    }
+
+    // Алгоритм Эдмондса-Карпа (упрощенный фалкерсон)
+    std::vector<int> parent(n);
+    double maxFlow = 0.0;
+
+    while (bfsForFlow(sourceIndex, sinkIndex, capacity, parent)) {
+        double pathFlow = std::numeric_limits<double>::max();
+        for (int v = sinkIndex; v != sourceIndex; v = parent[v]) {
+            int u = parent[v];
+            pathFlow = std::min(pathFlow, capacity[u][v]);
+        }
+
+        for (int v = sinkIndex; v != sourceIndex; v = parent[v]) {
+            int u = parent[v];
+            capacity[u][v] -= pathFlow;
+            capacity[v][u] += pathFlow;
+        }
+
+        maxFlow += pathFlow;
+    }
+
+    std::cout << "\n=== MAXIMUM FLOW CALCULATION ===" << std::endl;
+    std::cout << "Source CS: " << sourceId << std::endl;
+    std::cout << "Sink CS: " << sinkId << std::endl;
+    std::cout << "Maximum flow: " << maxFlow << " thousand m3/day" << std::endl;
+
+    Logger::log("Calculated max flow from CS " + std::to_string(sourceId) +
+        " to CS " + std::to_string(sinkId) + ": " +
+        std::to_string(maxFlow) + " thousand m3/day");
+
+    return maxFlow;
+}
+
+double Network::dijkstra(int startId, int endId, std::vector<int>& path) {
+    if (stations.empty() || connections.empty()) {
+        return std::numeric_limits<double>::max();
+    }
+
+    std::unordered_map<int, int> idToIndex;
+    std::unordered_map<int, int> indexToId;
+    int index = 0;
+    for (const auto& station_pair : stations) {
+        idToIndex[station_pair.first] = index;
+        indexToId[index] = station_pair.first;
+        index++;
+    }
+
+    int n = (int)stations.size();
+    int startIndex = idToIndex[startId];
+    int endIndex = idToIndex[endId];
+
+    std::vector<double> dist(n, std::numeric_limits<double>::max());
+    std::vector<int> prev(n, -1);
+    std::vector<bool> visited(n, false);
+
+    dist[startIndex] = 0;
+
+    std::vector<std::vector<double>> weight(n, std::vector<double>(n, std::numeric_limits<double>::max()));
+
+    for (const auto& conn : connections) {
+        int u = idToIndex[conn.csInId];
+        int v = idToIndex[conn.csOutId];
+        weight[u][v] = conn.weight;
+    }
+
+    // Алгоритм Дейкстры
+    for (int i = 0; i < n; ++i) {
+        int u = -1;
+        double minDist = std::numeric_limits<double>::max();
+
+        for (int j = 0; j < n; ++j) {
+            if (!visited[j] && dist[j] < minDist) {
+                minDist = dist[j];
+                u = j;
+            }
+        }
+
+        if (u == -1 || u == endIndex) {
+            break;
+        }
+
+        visited[u] = true;
+
+        for (int v = 0; v < n; ++v) {
+            if (!visited[v] && weight[u][v] < std::numeric_limits<double>::max()) {
+                double newDist = dist[u] + weight[u][v];
+                if (newDist < dist[v]) {
+                    dist[v] = newDist;
+                    prev[v] = u;
+                }
+            }
+        }
+    }
+
+    if (dist[endIndex] < std::numeric_limits<double>::max()) {
+        std::vector<int> reversePath;
+        for (int v = endIndex; v != -1; v = prev[v]) {
+            reversePath.push_back(indexToId[v]);
+        }
+
+        path.clear();
+        for (int i = (int)reversePath.size() - 1; i >= 0; --i) {
+            path.push_back(reversePath[i]);
+        }
+    }
+
+    return dist[endIndex];
+}
+
+std::vector<int> Network::findShortestPath(int startId, int endId) {
+    if (stations.empty() || connections.empty()) {
+        std::cout << "Error: Network is empty!" << std::endl;
+        return {};
+    }
+
+    if (!getStationById(startId)) {
+        std::cout << "Error: Start station with ID " << startId << " not found!" << std::endl;
+        return {};
+    }
+
+    if (!getStationById(endId)) {
+        std::cout << "Error: End station with ID " << endId << " not found!" << std::endl;
+        return {};
+    }
+
+    if (startId == endId) {
+        std::cout << "Error: Start and end stations cannot be the same!" << std::endl;
+        return { startId };
+    }
+
+    std::vector<int> path;
+    double totalWeight = dijkstra(startId, endId, path);
+
+    std::cout << "\n=== SHORTEST PATH CALCULATION ===" << std::endl;
+    std::cout << "Start CS: " << startId << std::endl;
+    std::cout << "End CS: " << endId << std::endl;
+
+    if (totalWeight < std::numeric_limits<double>::max()) {
+        std::cout << "Total distance: " << totalWeight << " km" << std::endl;
+        std::cout << "Path: ";
+        for (size_t i = 0; i < path.size(); ++i) {
+            std::cout << "CS " << path[i];
+            if (i < path.size() - 1) {
+                std::cout << " -> ";
+            }
+        }
+        std::cout << std::endl;
+
+        std::cout << "\nPipes on the path:" << std::endl;
+        for (size_t i = 0; i < path.size() - 1; ++i) {
+            int from = path[i];
+            int to = path[i + 1];
+
+
+            for (const auto& conn : connections) {
+                if (conn.csInId == from && conn.csOutId == to) {
+                    Pipe* pipe = getPipeById(conn.id);
+                    if (pipe) {
+                        std::cout << "  Pipe " << conn.id << " (CS " << from << " -> CS " << to
+                            << "): Length = " << pipe->getLength() << " km, "
+                            << "Diameter = " << pipe->getDiameter() << " mm, "
+                            << "Status = " << (pipe->isUnderRepair() ? "Under repair" : "Working") << std::endl;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    else {
+        std::cout << "No path exists between CS " << startId << " and CS " << endId << std::endl;
+        path.clear();
+    }
+
+    Logger::log("Calculated shortest path from CS " + std::to_string(startId) +
+        " to CS " + std::to_string(endId) + ": distance = " +
+        std::to_string(totalWeight) + " km");
+
+    return path;
 }

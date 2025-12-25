@@ -121,3 +121,50 @@ Added pipe with ID: 4
 Added pipe with ID: 5
 Connected CS 2 -> CS 3 using pipe 4
 Deleted pipe with ID: 1
+Added pipe with ID: 1
+Added CS with ID: 1
+Added CS with ID: 2
+Connected CS 1 -> CS 2 using pipe 1
+Deleted pipe with ID: 1
+Added pipe with ID: 1
+Added CS with ID: 1
+Added CS with ID: 2
+Connected CS 1 -> CS 2 using pipe 1
+Removed 1 connections using pipe ID: 1
+Deleted pipe with ID: 1
+Connected CS 1 -> CS 2 using pipe 2
+Removed 1 connections using pipe ID: 2
+Deleted pipe with ID: 2
+Added pipe with ID: 1
+Added CS with ID: 1
+Added CS with ID: 2
+Connected CS 1 -> CS 2 using pipe 1
+Removed 1 connections using pipe ID: 1
+Deleted pipe with ID: 1
+Added CS with ID: 1
+Added CS with ID: 2
+Added CS with ID: 3
+Added CS with ID: 4
+Added CS with ID: 5
+Added pipe with ID: 1
+Added pipe with ID: 2
+Added pipe with ID: 3
+Added pipe with ID: 4
+Added pipe with ID: 5
+Added pipe with ID: 6
+Added pipe with ID: 7
+Connected CS 1 -> CS 2 using pipe 1
+Connected CS 1 -> CS 3 using pipe 2
+Connected CS 2 -> CS 3 using pipe 3
+Connected CS 3 -> CS 4 using pipe 8
+Connected CS 3 -> CS 5 using pipe 5
+Connected CS 4 -> CS 5 using pipe 6
+Connected CS 5 -> CS 1 using pipe 7
+Removed 1 connections using pipe ID: 7
+Deleted pipe with ID: 7
+Performed topological sort. Order: 5 stations
+Calculated max flow from CS 1 to CS 5: 5.850250 thousand m3/day
+Calculated shortest path from CS 1 to CS 5: distance = 210.000000 km
+Calculated shortest path from CS 2 to CS 5: distance = 140.000000 km
+Fully edited pipe with ID: 5
+Calculated max flow from CS 3 to CS 5: 5.850250 thousand m3/day
